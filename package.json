@@ -15,17 +15,30 @@
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "autoprefixer": "^10.0.0",
-    "electron": "^24.0.0",
-    "electron-builder": "^24.3.0",
-    "postcss": "^8.0.0",
-    "tailwindcss": "^3.0.0",
-    "typescript": "^5.4.5"
+    "autoprefixer": "^10.4.19",
+    "electron": "^31.0.1",
+    "electron-builder": "^24.13.3",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^3.0.1"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@tanstack/react-router": "^1.36.3",
+    "@tanstack/router-cli": "^1.37.0",
+    "@tanstack/router-devtools": "^1.36.3",
+    "@types/compose-function": "^0.0.33",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "compose-function": "^3.0.3",
+    "history": "^5.3.0",
+    "lucide-react": "^0.394.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "browserslist": {
     "production": [
