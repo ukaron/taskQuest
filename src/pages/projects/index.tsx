@@ -1,20 +1,25 @@
-import React from "react";
-import ProjectList from "../../features/project-list/ui/ProjectList";
-import { createRoute } from "@tanstack/react-router";
-import { rootRoute } from "../../app/_router";
+import { createPrivateRoute } from "@/shared/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
+import { Button } from "../../shared/ui/button";
+import { ProjectListWidjet } from "@/widgets/ProjectList";
 
-export const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: HomePage,
+export const projectsRoute = createPrivateRoute({
+  path: "/projects",
+  component: ProjectsPage,
 });
 
-function HomePage() {
+function ProjectsPage() {
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate({ to: "/project-new" });
+  };
+
   return (
     <div className="p-2">
-      <ProjectList />
+      <ProjectListWidjet />
+      <Button onClick={handleClick}>Create new</Button>
     </div>
   );
 }
 
-export default HomePage;
+export default ProjectsPage;
