@@ -1,4 +1,9 @@
-import { Outlet, createRouter, createRootRoute } from "@tanstack/react-router";
+import {
+  Outlet,
+  createRouter,
+  createRootRoute,
+  createHashHistory,
+} from "@tanstack/react-router";
 import { indexRoute } from "../pages/home";
 import { projectIdRoute } from "../pages/project-read";
 import { authRoute } from "../pages/auth";
@@ -35,4 +40,5 @@ const routeTree = rootRoute.addChildren([
   newProjectRoute,
 ]);
 
-export const router = createRouter({ routeTree });
+const hashHistory = createHashHistory();
+export const router = createRouter({ routeTree, history: hashHistory });
