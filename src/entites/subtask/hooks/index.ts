@@ -1,29 +1,50 @@
 import { db } from "@/shared/lib/firebaseConfig";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { query, collection, where, onSnapshot } from "firebase/firestore";
 import { useEffect } from "react";
 import { ISubTask } from "../models";
-import { getSubTasksByTaskId } from "../api";
+import { getSubTasksByTaskId, updateSubtaskStatus } from "../api";
 
 export const useSubTaskByTaskIdSubscription = (taskId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const q = query(collection(db, "subTasks"), where("taskId", "==", taskId));
+    const q = query(collection(db, "subtasks"), where("taskId", "==", taskId));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const subTasks = querySnapshot.docs.map((doc) => ({
+      const subtasks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as ISubTask[];
 
-      queryClient.setQueryData(["subTasks", taskId], subTasks);
+      queryClient.setQueryData(["subtasks", taskId], subtasks);
     });
 
     return () => unsubscribe();
   }, [taskId, queryClient]);
 
   return useQuery({
-    queryKey: ["subTasks", taskId],
+    queryKey: ["subtasks", taskId],
     queryFn: () => getSubTasksByTaskId(taskId),
+  });
+};
+
+export const useUpdateSubtaskStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      subtaskId,
+      status,
+    }: {
+      subtaskId: string;
+      status: string;
+    }) => updateSubtaskStatus(subtaskId, status),
+    onSuccess: (_, { subtaskId }) => {
+      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
+      queryClient.invalidateQueries({ queryKey: ["subtask", subtaskId] });
+    },
+    onError: (error) => {
+      console.error("Error updating subtask status:", error);
+    },
   });
 };

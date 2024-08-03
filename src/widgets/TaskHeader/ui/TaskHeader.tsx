@@ -3,16 +3,11 @@ import { TaskEditButton } from "@/features/task-edit/ui/TaskEditButton";
 import { taskIdRoute } from "@/pages/taskPage";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-import { useTaskSolveStore } from "@/widgets/TaskSolve";
+import { Link } from "@tanstack/react-router";
 
 export function TaskHeader() {
   const { taskId } = taskIdRoute.useParams();
   const { data: task } = useTaskByIdSubscription(taskId);
-  const startSolve = useTaskSolveStore((state) => state.startSolve);
-
-  const handleClick = () => {
-    startSolve();
-  };
 
   return (
     <>
@@ -30,9 +25,9 @@ export function TaskHeader() {
           <Button variant="outline" size="sm">
             Discard
           </Button>
-          <Button size="sm" onClick={handleClick}>
-            Выполнить
-          </Button>
+          <Link to={`/task/${taskId}`}>
+            <Button size="sm">Выполнить</Button>
+          </Link>
         </div>
       </div>
       {/* {edit && (

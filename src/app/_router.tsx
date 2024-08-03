@@ -13,6 +13,7 @@ import { taskIdRoute } from "@/pages/taskPage";
 import { useTaskSolveStore } from "@/widgets/TaskSolve";
 import { projectsRoute } from "@/pages/projects";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { taskRunIdRoute } from "@/pages/task-run";
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -36,6 +37,7 @@ export const rootRoute = createRootRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   projectsRoute.addChildren([projectIdRoute.addChildren([taskIdRoute])]),
+  taskRunIdRoute,
   authRoute,
   newProjectRoute,
 ]);

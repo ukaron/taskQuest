@@ -1,6 +1,8 @@
 import { useTaskByIdSubscription } from "@/entites/task";
+import { Settings } from "@/features/settings-set";
+import SubtaskList from "@/features/task-run/ui";
 import CountdownTimer from "@/features/timer-run/ui/TimerRun";
-import { taskIdRoute } from "@/pages/taskPage";
+import { taskRunIdRoute } from "@/pages/task-run";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -9,25 +11,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
-import { useState } from "react";
-import { Settings as SettingIcon } from "lucide-react";
-import { useTaskSolveStore } from "../store";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
-import { Settings } from "@/features/settings-set";
-const { ipcRenderer } = window.require
-  ? window.require("electron")
-  : { ipcRenderer: null };
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/ui/tooltip";
+import { useRouter } from "@tanstack/react-router";
+import { Info, Settings as SettingIcon } from "lucide-react";
+import { useState } from "react";
+// const { ipcRenderer } = window.require
+//   ? window.require("electron")
+//   : { ipcRenderer: null };
 
 export const TaskSolve = () => {
   const [showTimer, setShowTimer] = useState(false);
-  const { taskId } = taskIdRoute.useParams();
+  const { taskId } = taskRunIdRoute.useParams();
   const { data: task } = useTaskByIdSubscription(taskId);
-  const stopSolve = useTaskSolveStore((state) => state.stopSolve);
+  const router = useRouter();
+  const onBack = () => router.history.back();
 
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between">
-        <CardTitle>{task?.title}</CardTitle>
+        <CardTitle className="gap-3 flex">
+          {task?.title}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{task?.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardTitle>
         <Popover>
           <PopoverTrigger>
             <SettingIcon />
@@ -39,21 +59,18 @@ export const TaskSolve = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <p>{task?.description}</p>
-          </div>
+          <SubtaskList />
           <div className="grid gap-3">{showTimer && <CountdownTimer />}</div>
+          {/* <div className="grid gap-3">
+            {showTimer && (
+              <TimerControls isPaused={isPaused} togglePause={togglePause} />
+            )}
+          </div> */}
         </div>
       </CardContent>
       <CardFooter>
         <div className="w-full flex items-center justify-center gap-10 ">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              stopSolve();
-            }}
-          >
+          <Button variant="outline" size="sm" onClick={onBack}>
             Назад
           </Button>
           <Button size="sm" onClick={() => setShowTimer(true)}>

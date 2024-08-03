@@ -5,17 +5,18 @@ import {
   getDocs,
   onSnapshot,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/shared/lib/firebaseConfig";
 import { ISubTask } from "../models";
 
 export const createSubTask = async (subTask: Omit<ISubTask, "id">) => {
-  await addDoc(collection(db, "subTasks"), subTask);
+  await addDoc(collection(db, "subtasks"), subTask);
 };
 
 export const getSubTasksByTaskId = async (taskId: string) => {
-  const q = query(collection(db, "subTasks"), where("taskId", "==", taskId));
+  const q = query(collection(db, "subtasks"), where("taskId", "==", taskId));
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map((doc) => ({
@@ -38,4 +39,12 @@ export const subscribeToSubTaskById = (
       callback(taskData);
     }
   });
+};
+
+export const updateSubtaskStatus = async (
+  subtaskId: string,
+  status: string
+) => {
+  const docRef = doc(db, "subtasks", subtaskId);
+  await updateDoc(docRef, { status });
 };

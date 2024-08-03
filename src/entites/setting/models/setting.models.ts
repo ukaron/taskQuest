@@ -21,4 +21,5 @@ export interface ISettings {
     onTop: boolean;
     resize: boolean;
   };
+  id: string;
 }
