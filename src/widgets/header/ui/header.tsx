@@ -1,12 +1,5 @@
 import { BreadcrumbsFeature } from "@/features/breadcrumbs";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-  BreadcrumbPage,
-} from "@/shared/ui/breadcrumb";
+import { auth } from "@/shared/lib/firebaseConfig";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
@@ -17,10 +10,17 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { useNavigate } from "@tanstack/react-router";
+import { signOut } from "firebase/auth";
 import { ChevronLeft } from "lucide-react";
 
 export const Header = () => {
   const navigator = useNavigate();
+
+  const onLogout = () => {
+    localStorage.removeItem("token");
+    signOut(auth);
+    navigator({ to: "../" });
+  };
 
   return (
     <header className="sticky w-full top-0 z-30 flex sm:py-4 h-14 justify-between items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -53,7 +53,7 @@ export const Header = () => {
           <DropdownMenuItem>Settings</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Logout</DropdownMenuItem>
+          <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>

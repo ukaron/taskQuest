@@ -12,8 +12,8 @@ import { Header } from "@/widgets/header";
 import { taskIdRoute } from "@/pages/taskPage";
 import { useTaskSolveStore } from "@/widgets/TaskSolve";
 import { projectsRoute } from "@/pages/projects";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { taskRunIdRoute } from "@/pages/task-run";
+import { Toaster } from "@/shared/ui/sonner";
 
 declare module "@tanstack/react-router" {
   interface Register {
@@ -28,7 +28,7 @@ export const rootRoute = createRootRoute({
       <div className="w-full h-full flex justify-center items-center flex-col">
         {!isSolveTask && <Header />}
         <Outlet />
-        <TanStackRouterDevtools />
+        <Toaster />
       </div>
     );
   },

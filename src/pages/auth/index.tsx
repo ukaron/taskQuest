@@ -1,16 +1,34 @@
-import { createRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { rootRoute } from "../../app/_router";
+import { createRoute, useNavigate } from "@tanstack/react-router";
 import {
-  User,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signOut,
 } from "firebase/auth";
+import { useEffect } from "react";
+import { rootRoute } from "../../app/_router";
 
 import { auth } from "@/shared/lib/firebaseConfig";
 import { Button } from "@/shared/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/shared/ui/form";
+import { Input } from "@/shared/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
 export const authRoute: any = createRoute({
   getParentRoute: () => rootRoute,
@@ -18,13 +36,26 @@ export const authRoute: any = createRoute({
   component: AuthPage,
 });
 
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
 export function AuthPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [user, setUser] = useState<User | null>(null);
+  const navigator = useNavigate();
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
+
+  const { handleSubmit, control, getValues } = form;
 
   const signUp = async () => {
     try {
+      const { email, password } = getValues();
+      if (!email.length || !password.length) return;
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -32,12 +63,16 @@ export function AuthPage() {
       );
       const token = await userCredential.user.getIdToken();
       localStorage.setItem("token", token);
+      navigator({ to: "../" });
     } catch (error) {
       console.error("Error signing up: ", error);
     }
   };
 
-  const signIn = async () => {
+  const onSubmit: SubmitHandler<LoginFormData> = async ({
+    email,
+    password,
+  }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -46,54 +81,105 @@ export function AuthPage() {
       );
       const token = await userCredential.user.getIdToken();
       localStorage.setItem("token", token);
+      navigator({ to: "../" });
     } catch (error) {
-      console.error("Error signing in: ", error);
+      console.dir("Error signing in: ", error);
+      toast.error("unknown user");
     }
   };
+  useEffect(() => {
+    onAuthStateChanged(auth, () => {
+      navigator({ to: "../" });
+    });
+  }, []);
 
   useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
-    });
+    const token = localStorage.getItem("token");
+
+    if (token) navigator({ to: `/` });
   }, []);
 
   return (
     <div>
-      <h1>Authentication</h1>
-      {user ? (
-        <div>
-          <p>Signed in as {user.email}</p>
-          <Button
-            onClick={() => {
-              localStorage.removeItem("token");
-              signOut(auth);
-            }}
+      <Card className="w-full max-w-sm">
+        <FormProvider {...form}>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="w-full bg-white p-8 rounded shadow-md flex flex-col gap-2"
           >
-            Log out
-          </Button>
-        </div>
-      ) : (
-        <div>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-          />
-          <button onClick={signUp}>Sign Up</button>
-          <button onClick={signIn}>Sign In</button>
-        </div>
-      )}
+            <CardHeader>
+              <CardTitle className="text-2xl">Вход</CardTitle>
+              <CardDescription>
+                Введите свой адрес электронной почты ниже, чтобы войти в свою
+                учетную запись.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <FormField
+                  control={control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <div className="grid gap-3">
+                          <Input
+                            {...field}
+                            id="Emanil"
+                            autoComplete="email"
+                            type="text"
+                            required
+                            className="w-full"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="grid gap-2">
+                <FormField
+                  control={control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Пароль</FormLabel>
+                      <FormControl>
+                        <div className="grid gap-3">
+                          <Input
+                            {...field}
+                            id="Emanil"
+                            type="password"
+                            autoComplete="current-password"
+                            required
+                            className="w-full"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button type="submit" className="w-full">
+                Войти
+              </Button>
+              <Button
+                type="button"
+                className="w-full"
+                variant="outline"
+                onClick={signUp}
+              >
+                Зарегистрироваться
+              </Button>
+            </CardFooter>
+          </form>
+        </FormProvider>
+      </Card>
     </div>
   );
 }
