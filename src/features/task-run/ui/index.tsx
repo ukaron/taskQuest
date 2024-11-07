@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useSubTaskByTaskIdSubscription,
   useUpdateSubtaskStatus,
@@ -13,66 +13,59 @@ const SubtaskList: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeSubtask, setActiveSubtask] = useState<string | null>(null);
   const [currentSubtask, setCurrentSubtask] = useState<string | null>(null);
+  const isMounted = useRef(false);
 
   const handleStatusChange = (id: string, status: string) => {
-    if (status === "active") {
-      updateSubtaskStatus({ subtaskId: id, status: "completed" });
+    if (status !== "completed") {
       const nextSubtask = subtasks?.find(
-        (t) => t.id !== currentSubtask && t.status === "incompleted"
+        (t) => t.id !== activeSubtask && t.status !== "completed"
       );
-      if (!nextSubtask) {
-        setActiveSubtask(null);
-        return;
-      }
-      setActiveSubtask(nextSubtask.id);
-      updateSubtaskStatus({ subtaskId: nextSubtask.id, status: "active" });
+      nextSubtask &&
+        updateSubtaskStatus({ subtaskId: nextSubtask.id, status: "active" });
+      updateSubtaskStatus({ subtaskId: id, status: "completed" });
+      setActiveSubtask(nextSubtask?.id || null);
     } else {
       setCurrentSubtask(id);
-      updateSubtaskStatus({ subtaskId: id, status: "incompleted" });
       setDialogOpen(true);
     }
   };
 
   const handleDialogClose = () => {
+    if (currentSubtask) {
+      updateSubtaskStatus({ subtaskId: currentSubtask, status: "incomplete" });
+      setCurrentSubtask(null);
+    }
     setDialogOpen(false);
   };
 
   const handleDialogConfirm = () => {
     if (currentSubtask) {
-      const prevSubtask = activeSubtask;
       setActiveSubtask(currentSubtask);
       updateSubtaskStatus({ subtaskId: currentSubtask, status: "active" });
-      if (prevSubtask)
-        updateSubtaskStatus({
-          subtaskId: prevSubtask,
-          status: "incompleted",
-        });
+      setCurrentSubtask(null);
     }
-    handleDialogClose();
+    setDialogOpen(false);
   };
 
   useEffect(() => {
-    if (activeSubtask === null && subtasks?.[0]) {
-      const nextSubtask = subtasks?.find(
-        (t) => t.id !== currentSubtask && t.status === "incompleted"
-      );
-      if (!nextSubtask) {
-        setActiveSubtask(null);
-        return;
-      }
-      updateSubtaskStatus({ subtaskId: subtasks?.[0].id, status: "active" });
-      setActiveSubtask(subtasks[0].id);
+    if (subtasks?.[0] && !isMounted.current) {
+      const nextSubtask = subtasks
+        .sort((a, b) => a.createdAt?.seconds - b.createdAt?.seconds)
+        ?.find((t) => t.id !== currentSubtask && t.status !== "completed");
+      const activeSubtask = subtasks?.find((t) => t.status === "active");
+
+      setActiveSubtask(activeSubtask?.id || nextSubtask?.id || null);
+      isMounted.current = true;
     }
   }, [subtasks]);
 
   if (isLoading) return <div>Loading...</div>;
-  console.log(subtasks);
 
   return (
     <div>
       {subtasks &&
         subtasks
-          .filter((t) => t.id === activeSubtask || t.status === "completed")
+          .filter((t) => t.status === "completed")
           .map((subtask) => (
             <SubtaskItem
               key={subtask.id}
@@ -85,6 +78,13 @@ const SubtaskList: React.FC = () => {
         onClose={handleDialogClose}
         onConfirm={handleDialogConfirm}
       />
+
+      {activeSubtask && (
+        <SubtaskItem
+          subtask={subtasks?.find(({ id }) => activeSubtask === id)}
+          onStatusChange={handleStatusChange}
+        />
+      )}
     </div>
   );
 };

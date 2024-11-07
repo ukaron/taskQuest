@@ -1,5 +1,5 @@
 import { createPrivateRoute } from "@/shared/lib/utils";
-import { TaskSolve, useTaskSolveStore } from "@/widgets/TaskSolve";
+import { TaskSolve } from "@/widgets/TaskSolve";
 
 export const taskRunIdRoute = createPrivateRoute({
   path: "task/$taskId",

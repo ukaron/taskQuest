@@ -59,13 +59,8 @@ export const TaskSolve = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
+          {showTimer && <CountdownTimer />}
           <SubtaskList />
-          <div className="grid gap-3">{showTimer && <CountdownTimer />}</div>
-          {/* <div className="grid gap-3">
-            {showTimer && (
-              <TimerControls isPaused={isPaused} togglePause={togglePause} />
-            )}
-          </div> */}
         </div>
       </CardContent>
       <CardFooter>
