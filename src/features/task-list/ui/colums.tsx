@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { TableRowActions } from "./TableRowActions";
 
-import { ITask, TaskStatus, useTaskUpdate } from "@/entites/task";
+import { ITask } from "@/entites/task";
 
 export const columns: ColumnDef<ITask>[] = [
   {
@@ -114,6 +114,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
+import { Link } from "@tanstack/react-router";
 import { Column } from "@tanstack/react-table";
 import {
   ArrowDown,
@@ -122,8 +123,8 @@ import {
   EyeOff,
   SquareArrowOutUpRight,
 } from "lucide-react";
+import { SelectTaskStatus } from "./SelectTaskStatus";
 import { statuses } from "./TableToolbar";
-import { Link } from "@tanstack/react-router";
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -178,76 +179,3 @@ export function DataTableColumnHeader<TData, TValue>({
     </div>
   );
 }
-
-("use client");
-
-import * as React from "react";
-
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/shared/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
-
-export const SelectTaskStatus = ({
-  task,
-  curStatus,
-}: {
-  task: ITask;
-  curStatus:
-    | {
-        value: TaskStatus;
-        label: string;
-      }
-    | undefined;
-}) => {
-  const [open, setOpen] = React.useState(false);
-  const [selectedStatus, setSelectedStatus] = React.useState(curStatus);
-
-  const hook = useTaskUpdate();
-
-  const handleChangeStatus = (value: string) => {
-    try {
-      const newStatus = statuses.find((s) => s.value.toString() === value);
-      if (newStatus) hook.mutate({ ...task, status: newStatus?.value });
-      setSelectedStatus(newStatus);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setOpen(false);
-    }
-  };
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="w-[150px] justify-start">
-          {selectedStatus ? <>{selectedStatus.label}</> : <>Set status</>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0" side="right" align="start">
-        <Command>
-          <CommandInput placeholder="Change status..." />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {statuses.map((status) => (
-                <CommandItem
-                  key={status.value}
-                  value={status.value.toString()}
-                  onSelect={handleChangeStatus}
-                >
-                  {status.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-};

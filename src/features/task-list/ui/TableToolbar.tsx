@@ -68,26 +68,31 @@ export const statuses = [
     value: TaskStatus.Backlog,
     label: "Backlog",
     icon: HelpCircle,
+    variantButton: "yellow",
   },
   {
     value: TaskStatus.Open,
     label: "Open",
     icon: Circle,
+    variantButton: "ghost",
   },
   {
     value: TaskStatus.InProgress,
     label: "In Progress",
     icon: Timer,
+    variantButton: "blue",
   },
   {
     value: TaskStatus.Done,
     label: "Done",
     icon: CheckCircle,
+    variantButton: "green",
   },
   {
     value: TaskStatus.Canceled,
     label: "Canceled",
     icon: CircleOff,
+    variantButton: "red",
   },
 ];
 
