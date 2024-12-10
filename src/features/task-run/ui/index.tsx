@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  useSubTaskByTaskIdSubscription,
+  useSubTaskByTaskId,
   useUpdateSubtaskStatus,
 } from "@/entites/subtask/hooks";
 import SubtaskItem from "@/entites/subtask/ui/SubtaskItem";
@@ -8,7 +8,7 @@ import { taskRunIdRoute } from "@/pages/task-run";
 
 const SubtaskList: React.FC = () => {
   const { taskId } = taskRunIdRoute.useParams();
-  const { data: subtasks, isLoading } = useSubTaskByTaskIdSubscription(taskId);
+  const { data: subTasks, isLoading } = useSubTaskByTaskId(taskId);
   const { mutate: updateSubtaskStatus } = useUpdateSubtaskStatus();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeSubtask, setActiveSubtask] = useState<string | null>(null);
@@ -17,7 +17,7 @@ const SubtaskList: React.FC = () => {
 
   const handleStatusChange = (id: string, status: string) => {
     if (status !== "completed") {
-      const nextSubtask = subtasks?.find(
+      const nextSubtask = subTasks?.find(
         (t) => t.id !== activeSubtask && t.status !== "completed"
       );
       nextSubtask &&
@@ -48,28 +48,28 @@ const SubtaskList: React.FC = () => {
   };
 
   useEffect(() => {
-    if (subtasks?.[0] && !isMounted.current) {
-      const nextSubtask = subtasks
+    if (subTasks?.[0] && !isMounted.current) {
+      const nextSubtask = subTasks
         .sort((a, b) => a.createdAt?.seconds - b.createdAt?.seconds)
         ?.find((t) => t.id !== currentSubtask && t.status !== "completed");
-      const activeSubtask = subtasks?.find((t) => t.status === "active");
+      const activeSubtask = subTasks?.find((t) => t.status === "active");
 
       setActiveSubtask(activeSubtask?.id || nextSubtask?.id || null);
       isMounted.current = true;
     }
-  }, [subtasks]);
+  }, [subTasks]);
 
   if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
-      {subtasks &&
-        subtasks
+      {subTasks &&
+        subTasks
           .filter((t) => t.status === "completed")
           .map((subtask) => (
             <SubtaskItem
               key={subtask.id}
-              subtask={subtask}
+              subTask={subtask}
               onStatusChange={handleStatusChange}
             />
           ))}
@@ -81,7 +81,7 @@ const SubtaskList: React.FC = () => {
 
       {activeSubtask && (
         <SubtaskItem
-          subtask={subtasks?.find(({ id }) => activeSubtask === id)}
+          subTask={subTasks?.find(({ id }) => activeSubtask === id)}
           onStatusChange={handleStatusChange}
         />
       )}

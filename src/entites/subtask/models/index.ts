@@ -1,3 +1,4 @@
+import { TaskStatus } from "@/entites/task";
 import { Timestamp } from "firebase/firestore";
 
 export interface ISubTask {

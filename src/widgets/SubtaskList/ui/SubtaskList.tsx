@@ -1,5 +1,5 @@
 import { ISubTask } from "@/entites/subtask";
-import { useSubTaskByTaskIdSubscription } from "@/entites/subtask/hooks";
+import { useSubTaskByTaskId } from "@/entites/subtask/hooks";
 import { SubTaskNew } from "@/features/subtask-new";
 import { taskIdRoute } from "@/pages/taskPage";
 import {
@@ -20,8 +20,9 @@ import {
 } from "@/shared/ui/table";
 
 export const SubtaskManger = () => {
-  const { taskId } = taskIdRoute?.useParams?.();
-  const { data: subtasks } = useSubTaskByTaskIdSubscription(taskId);
+  const { taskId } = taskIdRoute?.useParams?.<{ taskId: string }>();
+
+  const { data: subTasks } = useSubTaskByTaskId(taskId);
 
   return (
     <Card>
@@ -40,7 +41,7 @@ export const SubtaskManger = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subtasks?.map(({ title, id, description }: ISubTask) => (
+            {subTasks?.map(({ title, id, description }: ISubTask) => (
               <TableRow key={id}>
                 <TableCell className="font-semibold">{title}</TableCell>
                 <TableCell>{description}</TableCell>
@@ -50,7 +51,7 @@ export const SubtaskManger = () => {
         </Table>
       </CardContent>
       <CardFooter className="justify-center border-t p-4">
-        <SubTaskNew />
+        <SubTaskNew taskId={taskId} />
       </CardFooter>
     </Card>
   );

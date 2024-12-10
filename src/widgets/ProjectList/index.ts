@@ -1,1 +1,1 @@
-export { ProjectListWidjet } from "./ui/list";
+export { ProjectListWidjet } from "./ui/ProjectList";

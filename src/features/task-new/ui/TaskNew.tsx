@@ -10,7 +10,7 @@ import {
 import { PlusCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { projectIdRoute } from "@/pages/project-read";
-import { ITask } from "@/entites/task";
+import { ITask, TaskStatus } from "@/entites/task";
 import { auth, db } from "@/shared/lib/firebaseConfig";
 import {
   FormField,
@@ -34,6 +34,7 @@ const taskSchema = z.object({
   priority: z.enum(Rating),
   importance: z.enum(Rating),
   complexity: z.enum(Rating),
+  order: z.number(),
   dueDate: z.date(),
 });
 
@@ -41,7 +42,8 @@ type TaskNewFormData = z.infer<typeof taskSchema>;
 
 export const TaskNew: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const { projectId } = projectIdRoute?.useParams?.();
+  const [isLoading, setIsLoading] = useState(false);
+  const { projectId } = projectIdRoute?.useParams?.<{ projectId: string }>();
   const queryClient = useQueryClient();
 
   const methods = useForm<TaskNewFormData>({
@@ -64,13 +66,15 @@ export const TaskNew: React.FC = () => {
       title: data.title,
       description: data.description,
       projectId,
-      status: "pending",
+      status: TaskStatus.Open,
       priority: data.priority,
       importance: data.importance,
       complexity: data.complexity,
+      order: data?.order || 0,
     };
 
     try {
+      setIsLoading(true);
       await addDoc(collection(db, "tasks"), {
         ...newTask,
         createdAt: new Date(),
@@ -81,6 +85,8 @@ export const TaskNew: React.FC = () => {
       reset();
     } catch (error) {
       console.error("Error adding task: ", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -226,7 +232,7 @@ export const TaskNew: React.FC = () => {
               )}
             />
             <DialogFooter>
-              <Button type="button" onClick={onSubmit}>
+              <Button type="button" disabled={isLoading} onClick={onSubmit}>
                 Создать задачу
               </Button>
             </DialogFooter>

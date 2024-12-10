@@ -12,9 +12,10 @@ import {
 } from "firebase/firestore";
 import { IProject } from "../models";
 
-export const addProject = async (project: IProject) => {
+export const addProject = async (project: Omit<IProject, "id">) => {
   try {
-    await addDoc(collection(db, "projects"), project);
+    const res = await addDoc(collection(db, "projects"), project);
+    return res;
   } catch (e) {
     console.error("Error adding project: ", e);
   }
@@ -70,25 +71,20 @@ export const getProjectsList = async () => {
   }
 };
 
-export const subscribeToprojects = (
+export const subscribeToProjects = (
   callback: (projects: IProject[]) => void
 ) => {
-  try {
-    const q = query(
-      collection(db, "projects"),
-      where("ownerId", "==", auth.currentUser?.uid || "")
-    );
-    return onSnapshot(q, (snapshot) => {
-      const projects = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as IProject[];
-      callback(projects);
-    });
-  } catch (e) {
-    console.error("Error query products: ", e);
-    return [];
-  }
+  const q = query(
+    collection(db, "projects"),
+    where("ownerId", "==", auth.currentUser?.uid || "")
+  );
+  return onSnapshot(q, (snapshot) => {
+    const projects = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as IProject[];
+    callback(projects);
+  });
 };
 
 export const subscribeToProject = (

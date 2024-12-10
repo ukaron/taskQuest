@@ -1,11 +1,14 @@
-import { IProject } from "@/entites/project";
+import { IProject, addProject } from "@/entites/project";
+import { auth } from "@/shared/lib/firebaseConfig";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { addDoc, collection } from "firebase/firestore";
-import React from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { z } from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/dialog";
 import {
   FormControl,
   FormField,
@@ -13,8 +16,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/ui/form";
-import { auth, db } from "@/shared/lib/firebaseConfig";
+import { Input } from "@/shared/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
+import { Timestamp } from "firebase/firestore";
+import { PlusCircle } from "lucide-react";
+import { FC, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
 
 const projectSchema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -23,81 +32,94 @@ const projectSchema = z.object({
 
 type ProjectNewFormData = z.infer<typeof projectSchema>;
 
-export const ProjectNewForm: React.FC = () => {
+export const ProjectNewForm: FC = () => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigator = useNavigate();
-  const methods = useForm<ProjectNewFormData>({
+
+  const form = useForm<ProjectNewFormData>({
     resolver: zodResolver(projectSchema),
     defaultValues: { name: "", description: "" },
   });
 
-  const { handleSubmit, control } = methods;
+  const { handleSubmit, control } = form;
 
   const onSubmit = async (data: ProjectNewFormData) => {
-    if (!auth?.currentUser?.uid) return;
-    const newProject: Omit<IProject, "id" | "createdAt"> = {
-      name: data.name,
-      description: data.description,
-      ownerId: auth?.currentUser?.uid,
-      projects: [],
-    };
-
     try {
-      const res = await addDoc(collection(db, "projects"), {
-        ...newProject,
-        createdAt: new Date(),
-      });
-      console.log(res);
-      navigator({ to: `/${res.id}` });
+      if (!auth?.currentUser?.uid) return;
+      setLoading(true);
+
+      const newProject: Omit<IProject, "id"> = {
+        name: data.name,
+        description: data.description,
+        ownerId: auth?.currentUser?.uid,
+        createdAt: Timestamp.now(),
+      };
+
+      const res = await addProject(newProject);
+      navigator({ to: `/projects/${res?.id}` });
     } catch (error) {
       console.error("Error adding project: ", error);
+    } finally {
+      setLoading(false);
+      setOpen(false);
     }
   };
 
   return (
-    <FormProvider {...methods}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full bg-white max-w-md p-8 rounded shadow-md flex flex-col gap-2"
-      >
-        <FormField
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project Name</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  autoComplete="name"
-                  placeholder="Project Name"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project Description</FormLabel>
-              <FormControl>
-                <Input
-                  required
-                  autoComplete="description"
-                  placeholder="Project Description"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Create Project</Button>
-      </form>
-    </FormProvider>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="lg" variant="default" className="gap-1">
+          <PlusCircle className="h-3.5 w-3.5" />
+          Новый проект
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Новый проект</DialogTitle>
+        </DialogHeader>
+        <FormProvider {...form}>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="w-full  max-w-md flex flex-col gap-2"
+          >
+            <FormField
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Название проекта</FormLabel>
+                  <FormControl>
+                    <Input required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Описание </FormLabel>
+                  <FormControl>
+                    <Input required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button disabled={loading} type="submit">
+                Create Project
+              </Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
   );
 };
 

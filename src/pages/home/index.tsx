@@ -1,6 +1,6 @@
+import { ProjectNewForm } from "@/features/project-new";
 import { createPrivateRoute } from "@/shared/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
-import { Button } from "../../shared/ui/button";
+import { ProjectListWidjet } from "@/widgets/ProjectList";
 
 export const indexRoute = createPrivateRoute({
   path: "/",
@@ -8,15 +8,10 @@ export const indexRoute = createPrivateRoute({
 });
 
 function HomePage() {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    navigate({ to: "/projects" });
-  };
-
   return (
-    <div className="p-2">
-      <Button onClick={handleClick}>To projects</Button>
+    <div className="h-[calc(100dvh - 72px)] gap-8 w-full flex flex-col items-center">
+      <ProjectListWidjet />
+      <ProjectNewForm />
     </div>
   );
 }

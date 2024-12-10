@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/shared/ui/button";
 import { Pause, Play, SkipForward } from "lucide-react";
+import { useEffect, useState } from "react";
 
 enum TimerStatus {
   Work,
@@ -72,8 +72,8 @@ const CountdownTimer: React.FC = () => {
   }, [timeLeft, status, settings]);
 
   return (
-    <div className="">
-      <p className="font-extrabold text-2xl">{formatTime(timeLeft)}</p>
+    <div className="flex flex-col items-center">
+      <p className="font-extrabold text-[90px]">{formatTime(timeLeft)}</p>
       <div>
         <Button size="icon" variant="outline" onClick={handlePause}>
           {isPaused ? <Play /> : <Pause />}

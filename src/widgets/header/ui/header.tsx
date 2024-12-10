@@ -1,4 +1,4 @@
-import { BreadcrumbsFeature } from "@/features/breadcrumbs";
+import { Breadcrumbs } from "@/features/breadcrumbs";
 import { auth } from "@/shared/lib/firebaseConfig";
 import { Button } from "@/shared/ui/button";
 import {
@@ -23,8 +23,8 @@ export const Header = () => {
   };
 
   return (
-    <header className="sticky w-full top-0 z-30 flex sm:py-4 h-14 justify-between items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-      <BreadcrumbsFeature />
+    <header className="sticky w-full top-0 z-30 flex sm:py-4 h-14 justify-between items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 lg:px-8">
+      <Breadcrumbs />
       <Button
         variant="outline"
         size="icon"
@@ -44,7 +44,7 @@ export const Header = () => {
             size="icon"
             className="overflow-hidden rounded-full"
           >
-            avatar
+            N H
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

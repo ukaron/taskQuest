@@ -3,28 +3,48 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { query, collection, where, onSnapshot } from "firebase/firestore";
 import { useEffect } from "react";
 import { ISubTask } from "../models";
-import { getSubTasksByTaskId, updateSubtaskStatus } from "../api";
+import {
+  createSubTask,
+  getSubTasksByTaskId,
+  updateSubtaskStatus,
+} from "../api";
 
-export const useSubTaskByTaskIdSubscription = (taskId: string) => {
+export const useSubTaskByTaskId = (taskId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const q = query(collection(db, "subtasks"), where("taskId", "==", taskId));
+    const q = query(collection(db, "subTasks"), where("taskId", "==", taskId));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const subtasks = querySnapshot.docs.map((doc) => ({
+      console.log(querySnapshot, q);
+
+      const subTasks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as ISubTask[];
 
-      queryClient.setQueryData(["subtasks", taskId], subtasks);
+      queryClient.setQueryData(["subTasks", taskId], subTasks);
     });
 
     return () => unsubscribe();
   }, [taskId, queryClient]);
 
   return useQuery({
-    queryKey: ["subtasks", taskId],
+    queryKey: ["subTasks", taskId],
     queryFn: () => getSubTasksByTaskId(taskId),
+  });
+};
+
+export const useCreateSubtask = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (subtask: Omit<ISubTask, "id">) => createSubTask(subtask),
+    onSuccess: (_, subtask) => {
+      queryClient.invalidateQueries({ queryKey: ["task", subtask.taskId] });
+    },
+    onError: (error) => {
+      console.error("Error updating subtask status:", error);
+    },
   });
 };
 
@@ -40,8 +60,8 @@ export const useUpdateSubtaskStatus = () => {
       status: string;
     }) => updateSubtaskStatus(subtaskId, status),
     onSuccess: (_, { subtaskId }) => {
-      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
-      queryClient.invalidateQueries({ queryKey: ["subtask", subtaskId] });
+      queryClient.invalidateQueries({ queryKey: ["subTasks"] });
+      queryClient.invalidateQueries({ queryKey: ["subTasks", subtaskId] });
     },
     onError: (error) => {
       console.error("Error updating subtask status:", error);

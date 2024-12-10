@@ -1,4 +1,3 @@
-import { ITask } from "@/entites/task/models";
 import { Timestamp } from "firebase/firestore";
 
 export interface IProject {
@@ -7,5 +6,4 @@ export interface IProject {
   description: string;
   ownerId: string;
   createdAt: Timestamp;
-  projects: ITask[];
 }

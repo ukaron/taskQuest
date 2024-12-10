@@ -2,13 +2,14 @@ import { subscribeToProject } from "@/entites/project";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
+  deleteTask,
   getTaskById,
   getTaskListByProjectID,
-  subscribeToTaskById,
   updateTask,
 } from "../api";
+import { subscribeToTaskById } from "../api/subscribes";
 
-export const useUpdateTask = () => {
+export const useTaskUpdate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -22,7 +23,21 @@ export const useUpdateTask = () => {
   });
 };
 
-export const useTasksByProjectIdSubscription = (projectId: string) => {
+export const useTaskDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (error) => {
+      console.error("Error updating project:", error);
+    },
+  });
+};
+
+export const useTasksByProjectId = (projectId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -39,7 +54,7 @@ export const useTasksByProjectIdSubscription = (projectId: string) => {
   });
 };
 
-export const useTaskByIdSubscription = (taskId: string) => {
+export const useTaskById = (taskId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {

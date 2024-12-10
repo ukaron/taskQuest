@@ -20,15 +20,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 
-const projectSchema = z.object({
-  name: z.string().min(1, "Project name is required"),
-  description: z.string().min(1, "Project description is required"),
-});
 interface IProjectEditFormProps {
   project?: IProject;
   onExitEdit: () => void;
 }
-type ProjectEditFormData = z.infer<typeof projectSchema>;
 
 export const ProjectEditForm: React.FC<IProjectEditFormProps> = ({
   project,
@@ -51,11 +46,8 @@ export const ProjectEditForm: React.FC<IProjectEditFormProps> = ({
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="w-full bg-white p-8 rounded shadow-md flex flex-col gap-2"
+        className="bg-white p-4 rounded shadow-md flex flex-col gap-2"
       >
-        <CardHeader>
-          <CardTitle>О проекте</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="grid gap-6">
             <FormField
@@ -121,3 +113,10 @@ export const ProjectEditForm: React.FC<IProjectEditFormProps> = ({
 };
 
 export default ProjectNewForm;
+
+type ProjectEditFormData = z.infer<typeof projectSchema>;
+
+const projectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  description: z.string().min(1, "Project description is required"),
+});

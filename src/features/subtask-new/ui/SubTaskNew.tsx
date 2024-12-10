@@ -1,6 +1,4 @@
-import { ISubTask } from "@/entites/subtask";
-import { createSubTask } from "@/entites/subtask/api";
-import { taskIdRoute } from "@/pages/taskPage";
+import { useCreateSubtask } from "@/entites/subtask/hooks";
 import { auth } from "@/shared/lib/firebaseConfig";
 import { Button } from "@/shared/ui/button";
 import {
@@ -21,9 +19,10 @@ import {
 import { Input } from "@/shared/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { Timestamp } from "firebase/firestore";
 import { PlusCircle } from "lucide-react";
 import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 
 const taskSchema = z.object({
@@ -33,10 +32,11 @@ const taskSchema = z.object({
 
 type SubTaskNewFormData = z.infer<typeof taskSchema>;
 
-export const SubTaskNew: React.FC = () => {
+export const SubTaskNew = ({ taskId }: { taskId: string }) => {
   const [open, setOpen] = useState(false);
-  const { taskId } = taskIdRoute?.useParams?.();
+  const { mutate: createSubTask, isPending } = useCreateSubtask();
   const queryClient = useQueryClient();
+  const disabled = !auth?.currentUser?.uid || !taskId;
 
   const methods = useForm<SubTaskNewFormData>({
     resolver: zodResolver(taskSchema),
@@ -45,30 +45,22 @@ export const SubTaskNew: React.FC = () => {
       description: "",
     },
   });
+  const { control, handleSubmit, reset } = methods;
 
-  const { control, handleSubmit, getValues, reset } = methods;
-
-  const onSubmit = async () => {
-    if (!auth?.currentUser?.uid || !taskId) return;
-    const data = getValues();
-    const newSubTask: Omit<ISubTask, "id" | "createdAt"> = {
-      title: data.title,
-      description: data.description,
-      taskId,
-      status: "pending",
-    };
-
+  const onSubmit = async (form: z.infer<typeof taskSchema>) => {
     try {
-      await createSubTask({
-        ...newSubTask,
-        createdAt: new Date(),
+      const res = await createSubTask({
+        ...form,
+        taskId,
+        status: "open",
+        createdAt: Timestamp.now(),
       });
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-
-      setOpen(false);
-      reset();
     } catch (error) {
       console.error("Error adding task: ", error);
+    } finally {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      setOpen(false);
+      reset();
     }
   };
 
@@ -93,6 +85,7 @@ export const SubTaskNew: React.FC = () => {
             <FormField
               control={control}
               name="title"
+              disabled={disabled}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Название</FormLabel>
@@ -110,6 +103,7 @@ export const SubTaskNew: React.FC = () => {
             />
             <FormField
               control={control}
+              disabled={disabled}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -128,7 +122,7 @@ export const SubTaskNew: React.FC = () => {
             />
 
             <DialogFooter className="mt-4">
-              <Button type="button" onClick={onSubmit}>
+              <Button disabled={isPending} type="submit">
                 Создать подзадачу
               </Button>
             </DialogFooter>

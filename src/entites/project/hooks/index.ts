@@ -2,17 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteProject,
   getProjectsById,
+  getProjectsList,
   subscribeToProject,
+  subscribeToProjects,
   updateProject,
 } from "../api";
 import { useEffect } from "react";
-
-export const useProjectsById = (id: string) => {
-  return useQuery({
-    queryKey: ["projects", id],
-    queryFn: () => getProjectsById(id),
-  });
-};
+import { auth } from "@/shared/lib/firebaseConfig";
 
 export const useUpdateProject = () => {
   const queryClient = useQueryClient();
@@ -42,7 +38,7 @@ export const useDeleteProject = () => {
   });
 };
 
-export const useProjectSubscription = (projectId: string) => {
+export const useProjectById = (projectId: string) => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -56,5 +52,22 @@ export const useProjectSubscription = (projectId: string) => {
   return useQuery({
     queryKey: ["projects", projectId],
     queryFn: () => getProjectsById(projectId),
+  });
+};
+
+export const useProjectsSubscription = () => {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToProjects((project) => {
+      queryClient.setQueryData(["projects"], project);
+    });
+
+    return () => unsubscribe();
+  }, [queryClient, auth.currentUser?.uid]);
+
+  return useQuery({
+    queryKey: ["projects"],
+    queryFn: () => getProjectsList(),
   });
 };

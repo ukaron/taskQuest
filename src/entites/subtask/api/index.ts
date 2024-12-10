@@ -12,11 +12,11 @@ import { db } from "@/shared/lib/firebaseConfig";
 import { ISubTask } from "../models";
 
 export const createSubTask = async (subTask: Omit<ISubTask, "id">) => {
-  await addDoc(collection(db, "subtasks"), subTask);
+  return await addDoc(collection(db, "subTasks"), subTask);
 };
 
 export const getSubTasksByTaskId = async (taskId: string) => {
-  const q = query(collection(db, "subtasks"), where("taskId", "==", taskId));
+  const q = query(collection(db, "subTasks"), where("taskId", "==", taskId));
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map((doc) => ({
@@ -45,6 +45,6 @@ export const updateSubtaskStatus = async (
   subtaskId: string,
   status: string
 ) => {
-  const docRef = doc(db, "subtasks", subtaskId);
+  const docRef = doc(db, "subTasks", subtaskId);
   await updateDoc(docRef, { status });
 };

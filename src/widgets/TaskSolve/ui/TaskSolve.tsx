@@ -1,4 +1,4 @@
-import { useTaskByIdSubscription } from "@/entites/task";
+import { useTaskById } from "@/entites/task";
 import { Settings } from "@/features/settings-set";
 import SubtaskList from "@/features/task-run/ui";
 import CountdownTimer from "@/features/timer-run/ui/TimerRun";
@@ -19,8 +19,8 @@ import {
   TooltipTrigger,
 } from "@/shared/ui/tooltip";
 import { useRouter } from "@tanstack/react-router";
-import { Info, Settings as SettingIcon } from "lucide-react";
-import { useState } from "react";
+import { Info, Settings as SettingIcon, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 // const { ipcRenderer } = window.require
 //   ? window.require("electron")
 //   : { ipcRenderer: null };
@@ -28,7 +28,7 @@ import { useState } from "react";
 export const TaskSolve = () => {
   const [showTimer, setShowTimer] = useState(false);
   const { taskId } = taskRunIdRoute.useParams();
-  const { data: task } = useTaskByIdSubscription(taskId);
+  const { data: task } = useTaskById(taskId);
   const router = useRouter();
   const onBack = () => router.history.back();
 
@@ -48,14 +48,8 @@ export const TaskSolve = () => {
             </Tooltip>
           </TooltipProvider>
         </CardTitle>
-        <Popover>
-          <PopoverTrigger>
-            <SettingIcon />
-          </PopoverTrigger>
-          <PopoverContent>
-            <Settings />
-          </PopoverContent>
-        </Popover>
+        <SoundButton />
+        <SettingsWrapper />
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
@@ -71,20 +65,54 @@ export const TaskSolve = () => {
           <Button size="sm" onClick={() => setShowTimer(true)}>
             Таймер
           </Button>
-          {/* <Button
-            size="icon"
-            onClick={() => {
-              if (ipcRenderer) {
-                ipcRenderer.send("make-transparent");
-              } else {
-                console.warn("ipcRenderer is not available");
-              }
-            }}
-          >
-            <Settings />
-          </Button> */}
         </div>
       </CardFooter>
     </Card>
+  );
+};
+
+const SoundButton = () => {
+  const [isSoundOn, setIsSoundOn] = useState(false);
+  const tickSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleClick = () => {
+    if (!tickSoundRef?.current) return;
+
+    if (isSoundOn) {
+      tickSoundRef.current.play();
+      tickSoundRef.current.loop = true;
+    } else {
+      if (tickSoundRef?.current?.pause) tickSoundRef.current?.pause?.();
+    }
+    setIsSoundOn((state) => !state);
+  };
+
+  useEffect(() => {
+    if (tickSoundRef.current && isSoundOn) {
+      tickSoundRef.current.play();
+      tickSoundRef.current.loop = true;
+    }
+  }, [tickSoundRef.current]);
+  return (
+    <>
+      <Button size="icon" variant="outline" onClick={handleClick}>
+        {isSoundOn ? <Volume2 /> : <VolumeX />}
+      </Button>
+      {/* Звук тиканья */}
+      <audio ref={tickSoundRef} src="/tick.mp3" preload="auto" />
+    </>
+  );
+};
+
+const SettingsWrapper = () => {
+  return (
+    <Popover>
+      <PopoverTrigger>
+        <SettingIcon />
+      </PopoverTrigger>
+      <PopoverContent>
+        <Settings />
+      </PopoverContent>
+    </Popover>
   );
 };

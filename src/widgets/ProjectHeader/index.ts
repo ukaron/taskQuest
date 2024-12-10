@@ -1,1 +1,1 @@
-export { ProjectHeader } from "./ui/dashboard";
+export { ProjectHeader } from "./ui/ProjectHeader";

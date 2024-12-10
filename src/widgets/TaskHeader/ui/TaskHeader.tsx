@@ -1,4 +1,4 @@
-import { useTaskByIdSubscription } from "@/entites/task/hooks";
+import { useTaskById } from "@/entites/task/hooks";
 import { TaskEditButton } from "@/features/task-edit/ui/TaskEditButton";
 import { taskIdRoute } from "@/pages/taskPage";
 import { Badge } from "@/shared/ui/badge";
@@ -7,7 +7,7 @@ import { Link } from "@tanstack/react-router";
 
 export function TaskHeader() {
   const { taskId } = taskIdRoute.useParams();
-  const { data: task } = useTaskByIdSubscription(taskId);
+  const { data: task } = useTaskById(taskId);
 
   return (
     <>

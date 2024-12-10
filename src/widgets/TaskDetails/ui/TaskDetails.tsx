@@ -1,4 +1,4 @@
-import { useTaskByIdSubscription, useUpdateTask } from "@/entites/task";
+import { useTaskById, useTaskUpdate } from "@/entites/task";
 import { taskIdRoute } from "@/pages/taskPage";
 import { Button } from "@/shared/ui/button";
 import {
@@ -30,9 +30,9 @@ const taskSchema = z.object({
 type TaskEditFormData = z.infer<typeof taskSchema>;
 
 export const TaskDetails = () => {
-  const { mutate, isPending, isSuccess } = useUpdateTask();
+  const { mutate, isPending, isSuccess } = useTaskUpdate();
   const { taskId } = taskIdRoute.useParams();
-  const { data: task } = useTaskByIdSubscription(taskId);
+  const { data: task } = useTaskById(taskId);
   const form = useForm<TaskEditFormData>({
     resolver: zodResolver(taskSchema),
     defaultValues: {

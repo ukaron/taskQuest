@@ -4,6 +4,7 @@ import { router } from "./_router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();
+
 function App() {
   return (
     <StrictMode>
