@@ -1,10 +1,5 @@
 import { rootRoute } from "@/app/_router";
-import {
-  Route,
-  RouteComponent,
-  createRoute,
-  redirect,
-} from "@tanstack/react-router";
+import { RouteComponent, createRoute, redirect } from "@tanstack/react-router";
 import { clsx, ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

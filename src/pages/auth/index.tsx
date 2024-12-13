@@ -87,16 +87,15 @@ export function AuthPage() {
       toast.error("unknown user");
     }
   };
-  useEffect(() => {
-    onAuthStateChanged(auth, () => {
-      navigator({ to: "../" });
-    });
-  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (token) navigator({ to: `/` });
+
+    onAuthStateChanged(auth, () => {
+      navigator({ to: "../" });
+    });
   }, []);
 
   return (
