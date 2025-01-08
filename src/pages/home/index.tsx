@@ -9,7 +9,7 @@ export const indexRoute = createPrivateRoute({
 
 function HomePage() {
   return (
-    <div className="h-[calc(100dvh - 72px)] gap-8 w-full flex flex-col items-center">
+    <div className="h-[calc(100dvh - 72px)] gap-8 w-full flex flex-col items-center justify-start">
       <ProjectListWidjet />
       <ProjectNewForm />
     </div>

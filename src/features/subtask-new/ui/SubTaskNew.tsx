@@ -73,7 +73,7 @@ export const SubTaskNew = ({ taskId }: { taskId: string }) => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] top-0 translate-y-10">
         <DialogHeader>
           <DialogTitle>Новая подзадача</DialogTitle>
         </DialogHeader>

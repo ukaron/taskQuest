@@ -17,14 +17,8 @@ export function TaskHeader() {
           <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
             {task?.title}
           </h1>
-          <Badge variant="default" className="ml-auto sm:ml-0">
-            Cрочная
-          </Badge>
         </div>
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm">
-            Discard
-          </Button>
           <Link to={`/task/${taskId}`}>
             <Button size="sm">Выполнить</Button>
           </Link>

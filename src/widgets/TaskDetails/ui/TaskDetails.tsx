@@ -60,7 +60,7 @@ export const TaskDetails = () => {
   }, [isSuccess]);
 
   return (
-    <Card x-chunk="dashboard-07-chunk-0">
+    <Card>
       <CardHeader>
         <CardTitle>Детали задачи</CardTitle>
       </CardHeader>

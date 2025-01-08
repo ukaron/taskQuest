@@ -75,7 +75,7 @@ export const ProjectNewForm: FC = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] top-0 translate-y-10">
         <DialogHeader>
           <DialogTitle>Новый проект</DialogTitle>
         </DialogHeader>
@@ -111,7 +111,7 @@ export const ProjectNewForm: FC = () => {
               )}
             />
 
-            <DialogFooter>
+            <DialogFooter className="mt-8">
               <Button disabled={loading} type="submit">
                 Create Project
               </Button>

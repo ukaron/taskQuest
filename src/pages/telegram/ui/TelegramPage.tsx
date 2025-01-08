@@ -20,7 +20,9 @@ function TelegramPage() {
     (async () => {
       if (init.current) return;
       init.current = true;
-      const params = new URLSearchParams(searchParams.tgWebAppData);
+      const params = new URLSearchParams(
+        searchParams.tgWebAppData || window.location.hash
+      );
       const telegramData: Record<string, string> = {};
 
       params.forEach((value, key) => {

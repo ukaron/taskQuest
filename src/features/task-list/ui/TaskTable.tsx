@@ -23,7 +23,6 @@ import {
   TableRow,
 } from "@/shared/ui/table";
 import { TableToolbar } from "./TableToolbar";
-import { TablePagination } from "./TablePagination";
 
 export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -117,7 +116,6 @@ export function TaskTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <TablePagination table={table} />
     </div>
   );
 }

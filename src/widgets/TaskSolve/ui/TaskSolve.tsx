@@ -19,11 +19,8 @@ import {
   TooltipTrigger,
 } from "@/shared/ui/tooltip";
 import { useRouter } from "@tanstack/react-router";
-import { Info, Settings as SettingIcon, Volume2, VolumeX } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-// const { ipcRenderer } = window.require
-//   ? window.require("electron")
-//   : { ipcRenderer: null };
+import { Info, Settings as SettingIcon } from "lucide-react";
+import { useState } from "react";
 
 export const TaskSolve = () => {
   const [showTimer, setShowTimer] = useState(false);
@@ -48,7 +45,6 @@ export const TaskSolve = () => {
             </Tooltip>
           </TooltipProvider>
         </CardTitle>
-        <SoundButton />
         <SettingsWrapper />
       </CardHeader>
       <CardContent>
@@ -68,39 +64,6 @@ export const TaskSolve = () => {
         </div>
       </CardFooter>
     </Card>
-  );
-};
-
-const SoundButton = () => {
-  const [isSoundOn, setIsSoundOn] = useState(false);
-  const tickSoundRef = useRef<HTMLAudioElement | null>(null);
-
-  const handleClick = () => {
-    if (!tickSoundRef?.current) return;
-
-    if (isSoundOn) {
-      tickSoundRef.current.play();
-      tickSoundRef.current.loop = true;
-    } else {
-      if (tickSoundRef?.current?.pause) tickSoundRef.current?.pause?.();
-    }
-    setIsSoundOn((state) => !state);
-  };
-
-  useEffect(() => {
-    if (tickSoundRef.current && isSoundOn) {
-      tickSoundRef.current.play();
-      tickSoundRef.current.loop = true;
-    }
-  }, [tickSoundRef.current]);
-  return (
-    <>
-      <Button size="icon" variant="outline" onClick={handleClick}>
-        {isSoundOn ? <Volume2 /> : <VolumeX />}
-      </Button>
-      {/* Звук тиканья */}
-      <audio ref={tickSoundRef} src="/tick.mp3" preload="auto" />
-    </>
   );
 };
 

@@ -105,6 +105,44 @@ export const columns: ColumnDef<ITask>[] = [
   },
 ];
 
+export const columnsMobile: ColumnDef<ITask>[] = [
+  {
+    accessorKey: "title",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Title" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
+          <span className="max-w-[200px] truncate font-medium">
+            {row.getValue("title")}
+          </span>
+        </div>
+      );
+    },
+  },
+
+  {
+    id: "run",
+    cell: ({ row }) => (
+      <Link to={`/task/${row.original.id}`}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-3 h-8 data-[state=open]:bg-accent"
+        >
+          <SquareArrowOutUpRight />
+        </Button>
+      </Link>
+    ),
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <TableRowActions row={row} />,
+  },
+];
+
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/button";
 import {

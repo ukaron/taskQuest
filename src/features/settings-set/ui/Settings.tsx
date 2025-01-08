@@ -1,21 +1,25 @@
+import { useSettingsStore } from "@/entites/setting/store/settings.store";
 import { debounce } from "@/shared/lib/utils";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as React from "react";
-import { useForm, FormProvider, Controller } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 export const Settings = () => {
+  const { settings, updateSettings } = useSettingsStore();
   const methods = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
-    defaultValues,
+    defaultValues: settings,
+    mode: "onChange",
   });
 
   const { control, watch } = methods;
-
   const formValues = watch();
+
+  const debouncedSaveSettings = debounce(updateSettings, 1000);
 
   React.useEffect(() => {
     debouncedSaveSettings(formValues);
@@ -25,88 +29,123 @@ export const Settings = () => {
     <div className="grid gap-4">
       <FormProvider {...methods}>
         <form>
-          <div className="space-y-2">
-            <h4 className="font-medium leading-none">Tomato timer</h4>
-          </div>
-          <div className="grid gap-2 mt-3">
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="timato-time">Tomato time</Label>
-              <Controller
-                name="tomato.time"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="timato-time"
-                    className="col-span-2 h-8"
-                    type="number"
+          {inputs.map((c) => (
+            <div key={c.title} className="grid gap-2 mt-3">
+              <div className="space-y-2">
+                <h4 className="font-medium leading-none">{c.title}</h4>
+              </div>
+              {c.child?.map((i) => (
+                <div
+                  key={i.name}
+                  className="grid grid-cols-3 items-center gap-4"
+                >
+                  <Label htmlFor={i.name} className="col-span-2">
+                    {i.label}
+                  </Label>
+                  <Controller
+                    name={i.name as any}
+                    control={control}
+                    render={({ field }) =>
+                      i.type === "boolean" ? (
+                        <Checkbox
+                          id={i.name}
+                          className="col-span-1 h-8 w-8"
+                          checked={!!field.value}
+                          onCheckedChange={(v) => field.onChange(v)}
+                        />
+                      ) : (
+                        <Input
+                          {...field}
+                          id={i.label}
+                          className="col-span-1 h-8"
+                          type={i.type}
+                        />
+                      )
+                    }
                   />
-                )}
-              />
+                </div>
+              ))}
             </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="tomato.shortBreak">Short break</Label>
-              <Controller
-                name="tomato.shortBreak"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="tomato.shortBreak"
-                    className="col-span-2 h-8"
-                    type="number"
-                  />
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="tomato.longBreak">Long break</Label>
-              <Controller
-                name="tomato.longBreak"
-                control={control}
-                render={({ field }) => (
-                  <Input
-                    {...field}
-                    id="tomato.longBreak"
-                    className="col-span-2 h-8"
-                    type="number"
-                  />
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="tomato.autostartBreak">Auto start breaks</Label>
-              <Controller
-                name="tomato.autostartBreak"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    {...field}
-                    value={+field.value}
-                    id="tomato.autostartBreak"
-                    className="col-span-2 "
-                  />
-                )}
-              />
-            </div>
-            <div className="grid grid-cols-3 items-center gap-4">
-              <Label htmlFor="tomato.autostartTomato">Auto start tomatos</Label>
-              <Controller
-                name="tomato.autostartTomato"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    {...field}
-                    onCheckedChange={field.onChange}
-                    value={+field.value}
-                    id="tomato.autostartTomato"
-                    className="col-span-2 "
-                  />
-                )}
-              />
-            </div>
-          </div>
-          <div className="space-y-2 mt-5">
+          ))}
+        </form>
+      </FormProvider>
+    </div>
+  );
+};
+
+const settingsSchema = z.object({
+  tomato: z.object({
+    time: z.number().min(1, "Time must be at least 1 minute"),
+    shortBreak: z.number().min(1, "Short break must be at least 1 minute"),
+    longBreak: z.number().min(1, "Long break must be at least 1 minute"),
+    autostartBreak: z.boolean(),
+    autostartTomato: z.boolean(),
+    longBreakInterval: z.number().min(1, "Interval must be at least 1"),
+  }),
+  sound: z.object({
+    on: z.boolean(),
+    alarmSound: z.string().nonempty("Alarm sound is required"),
+    alarmVol: z.number().min(0).max(100),
+    tickSound: z.string().nonempty("Tick sound is required"),
+    tickVol: z.number().min(0).max(100),
+  }),
+  notification: z.object({
+    on: z.boolean(),
+  }),
+  window: z.object({
+    opacity: z.number().min(0).max(100),
+    onTop: z.boolean(),
+    resize: z.boolean(),
+  }),
+});
+
+type SettingsFormData = z.infer<typeof settingsSchema>;
+
+const inputs = [
+  {
+    title: "Common",
+    child: [
+      {
+        name: "tomato.time",
+        type: "number",
+        label: "Tomato time",
+      },
+      {
+        name: "tomato.shortBreak",
+        type: "number",
+        label: "Short break",
+      },
+      {
+        name: "tomato.longBreak",
+        type: "number",
+        label: "Long break",
+      },
+      {
+        name: "tomato.autostartBreak",
+        type: "boolean",
+        label: "Auto start breaks",
+      },
+      {
+        name: "tomato.autostartTomato",
+        type: "boolean",
+        label: "Auto start tomatos",
+      },
+    ],
+  },
+  {
+    title: "Sound",
+    child: [
+      {
+        name: "sound.on",
+        type: "boolean",
+        label: "Sound on",
+      },
+    ],
+  },
+];
+
+{
+  /* <div className="space-y-2 mt-5">
             <h4 className="font-medium leading-none">Window</h4>
           </div>
           <div className="grid gap-2 mt-3">
@@ -141,68 +180,5 @@ export const Settings = () => {
                 )}
               />
             </div>
-          </div>
-        </form>
-      </FormProvider>
-    </div>
-  );
-};
-
-const settingsSchema = z.object({
-  tomato: z.object({
-    time: z.number().min(1, "Time must be at least 1 minute"),
-    shortBreak: z.number().min(1, "Short break must be at least 1 minute"),
-    longBreak: z.number().min(1, "Long break must be at least 1 minute"),
-    autostartBreak: z.boolean(),
-    autostartTomato: z.boolean(),
-    longBreakInterval: z.number().min(1, "Interval must be at least 1"),
-  }),
-  sound: z.object({
-    alarmSound: z.string().nonempty("Alarm sound is required"),
-    alarmVol: z.number().min(0).max(100),
-    tickSound: z.string().nonempty("Tick sound is required"),
-    tickVol: z.number().min(0).max(100),
-  }),
-  notification: z.object({
-    on: z.boolean(),
-  }),
-  window: z.object({
-    opacity: z.number().min(0).max(100),
-    onTop: z.boolean(),
-    resize: z.boolean(),
-  }),
-});
-
-type SettingsFormData = z.infer<typeof settingsSchema>;
-
-const defaultValues: SettingsFormData = {
-  tomato: {
-    time: 25,
-    shortBreak: 5,
-    longBreak: 15,
-    autostartBreak: false,
-    autostartTomato: false,
-    longBreakInterval: 4,
-  },
-  sound: {
-    alarmSound: "default",
-    alarmVol: 50,
-    tickSound: "default",
-    tickVol: 50,
-  },
-  notification: {
-    on: true,
-  },
-  window: {
-    opacity: 100,
-    onTop: false,
-    resize: true,
-  },
-};
-
-const saveSettings = async (data: SettingsFormData) => {
-  // Логика для сохранения настроек на бэкенде
-  console.log("Saving settings", data);
-};
-
-const debouncedSaveSettings = debounce(saveSettings, 1000);
+          </div> */
+}

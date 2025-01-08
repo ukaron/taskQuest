@@ -9,11 +9,13 @@ import {
 } from "@/shared/ui/card";
 import { Loader } from "@/shared/ui/loader";
 import { TaskTable } from "./TaskTable";
-import { columns } from "./colums";
+import { columns, columnsMobile } from "./colums";
+import useWindowSizes from "@/shared/hooks/useWindowSize";
 
 export const TaskList = ({ children }: { children: React.ReactNode }) => {
-  const { projectId } = projectIdRoute.useParams();
+  const { projectId } = projectIdRoute.useParams<{ projectId: string }>();
   const { data: tasks, error, isLoading } = useTasksByProjectId(projectId);
+  const { width } = useWindowSizes();
 
   return (
     <Card x-chunk="dashboard-07-chunk-1">
@@ -22,7 +24,12 @@ export const TaskList = ({ children }: { children: React.ReactNode }) => {
         {isLoading && <Loader />}
       </CardHeader>
       <CardContent>
-        {tasks && <TaskTable data={tasks} columns={columns} />}
+        {tasks && (
+          <TaskTable
+            data={tasks}
+            columns={width < 900 ? columnsMobile : columns}
+          />
+        )}
       </CardContent>
       <CardFooter className="justify-center border-t p-4">
         {children}

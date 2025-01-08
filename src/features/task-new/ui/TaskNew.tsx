@@ -99,7 +99,7 @@ export const TaskNew: React.FC = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-w-screen top-0 translate-y-10">
         <DialogHeader>
           <DialogTitle>Новая задача</DialogTitle>
         </DialogHeader>
@@ -231,7 +231,7 @@ export const TaskNew: React.FC = () => {
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="mt-8">
               <Button type="button" disabled={isLoading} onClick={onSubmit}>
                 Создать задачу
               </Button>
